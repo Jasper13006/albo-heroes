@@ -1,0 +1,11 @@
+{
+  "name": "albo-heroes",
+  "version": "1.0.0",
+  "description": "Albo Comics Library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ariel Lizarraga",
+  "license": "ISC"
+}
