@@ -10,7 +10,8 @@ export const getInformationOfCharacter = async (characterName:string): Promise<v
     const hash: string = hasher([String(ts),config.PRIVATE_KEY,config.PUBLIC_KEY])
     const auth: string = `apikey=${config.PUBLIC_KEY}&ts=${ts}&hash=${hash}`
 
-    const characterResponse = 
+    const characterResponse = await axios.get(`${config.MARVEL_API}/characters?name=Captain%20America&${auth}`)
+    console.log(characterResponse.data.data.results)
 
     // const comicsResponse = await axios.get(`${config.MARVEL_API}/characters/1009368/comics?limit=5&${auth}`)
 
