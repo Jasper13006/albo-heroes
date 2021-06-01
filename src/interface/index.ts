@@ -1,0 +1,3 @@
+export {
+    IpageOfComics
+} from './responsesOfMarvelApi'
