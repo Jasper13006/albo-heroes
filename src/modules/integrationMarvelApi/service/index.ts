@@ -1,9 +1,8 @@
 import axios from 'axios'
-import * as admin from 'firebase-admin';
-import db from '../../../database';
 import config from '../../../config'
-import { hasher } from '../../../utils/index';
-import { IpageOfComics, ICharacterNested } from '../../../interface';
+import { hasher,availableCaracters } from '../../../utils/index';
+import { IpageOfComics, ICharacterNested, ICharacter } from '../../../interface';
+import * as repository from '../repository/index'
 
 if (!config.PRIVATE_KEY || !config.PUBLIC_KEY) {
     throw new Error(`Nonexistent marvel credentials`)
@@ -13,39 +12,37 @@ const hash: string = hasher([String(ts), config.PRIVATE_KEY, config.PUBLIC_KEY])
 const auth: string = `apikey=${config.PUBLIC_KEY}&ts=${ts}&hash=${hash}`
 
 export const getInformationOfCharacter = async (characterName: string): Promise<void> => {
-    const last_sync = new Date()
+    try{
+        console.time(`Character ${characterName} populated in:`)
+        const last_sync = new Date();
 
-    //! CHARACTERNAME! Super importante agregarlo a la request de abajo
-    const characterResponse = await axios.get(`${config.MARVEL_API}/characters?name=Iron%20Man&${auth}`)
-    const { name, id } = characterResponse.data.data.results[0]
-    const promises = await createRequestCollection(id)
+    const characterNameForRequest = availableCaracters[characterName]
+    const characterResponse = await axios.get(`${config.MARVEL_API}/characters?name=${characterNameForRequest}&${auth}`);
 
-    console.time("axiosResolve")
-    const promisesResolves = await Promise.all(promises)
-    console.timeEnd("axiosResolve")
-    console.log("FINISH")
+    const { name, id } = characterResponse.data.data.results[0];
+
+    const promises = await createRequestCollection(id);
+    const promisesResolves = await Promise.all(promises);
 
     //* merge all pages
     const allInfoOfCharacter = mergeAllPages(promisesResolves)
-    // console.log(allInfoOfCharacters)
-    //comprobar si el caracter existe en db
 
-    // console.log(id)
-    // let characterRef = db.collection('character').doc(`${id}`);
-    // let character = await characterRef.get()
-
-    // if (!character.exists) {
-    // const dataToCreate = {
-    // name,
-    // id,
-    // last_sync,
-    // colaborators:{ writers:[], editors:[], colorists:[] }
-    // }
-    // const newcharacter = await characterRef.set(dataToCreate)
-    // }
-    // const comicsResponse = await axios.get(`${config.MARVEL_API}/characters/1009368/comics?limit=1&${auth}`)
-
-    return
+    const dataToSend: ICharacter = {
+        last_sync,
+        name,
+        id,
+        characters: allInfoOfCharacter.characters,
+        colaborators: {
+            writers: allInfoOfCharacter.writers,
+            editors: allInfoOfCharacter.editors,
+            colorists: allInfoOfCharacter.colorists,
+        }
+    }
+    await repository.createOrUpdate(dataToSend)
+    console.timeEnd(`Character ${characterName} populated in:`)
+    }catch(err){
+        console.error(err)
+    }
 }
 
 const mergeAllPages = (pagesOfComics: IpageOfComics[]): IpageOfComics => {
