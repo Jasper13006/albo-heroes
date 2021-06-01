@@ -1,3 +1,4 @@
 export {
-    IpageOfComics
+    IpageOfComics,
+    ICharacterNested
 } from './responsesOfMarvelApi'

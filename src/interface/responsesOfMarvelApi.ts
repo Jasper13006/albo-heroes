@@ -2,11 +2,11 @@ export interface IpageOfComics{
     writers: string[];
     editors: string[];
     colorists: string[];
-    characters: characterNested[]
+    characters: ICharacterNested[]
 }
 
-export interface characterNested{
-    name:string;
+export interface ICharacterNested{
+    character:string;
     id:string;
     comics: string[];
 }
