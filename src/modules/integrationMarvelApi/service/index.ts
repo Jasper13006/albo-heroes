@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import db from '../../../database';
 import config from '../../../config'
 import { hasher } from '../../../utils/index';
-import { IpageOfComics } from '../../../interface';
+import { IpageOfComics, ICharacterNested } from '../../../interface';
 
 if (!config.PRIVATE_KEY || !config.PUBLIC_KEY) {
     throw new Error(`Nonexistent marvel credentials`)
@@ -15,6 +15,7 @@ const auth: string = `apikey=${config.PUBLIC_KEY}&ts=${ts}&hash=${hash}`
 export const getInformationOfCharacter = async (characterName: string): Promise<void> => {
     const last_sync = new Date()
 
+    //! CHARACTERNAME! Super importante agregarlo a la request de abajo
     const characterResponse = await axios.get(`${config.MARVEL_API}/characters?name=Iron%20Man&${auth}`)
     const { name, id } = characterResponse.data.data.results[0]
     const promises = await createRequestCollection(id)
@@ -25,9 +26,7 @@ export const getInformationOfCharacter = async (characterName: string): Promise<
     console.log("FINISH")
 
     //* merge all pages
-    console.time("MergeAllInfoo")
     const allInfoOfCharacter = mergeAllPages(promisesResolves)
-    console.timeEnd("MergeAllInfoo")
     // console.log(allInfoOfCharacters)
     //comprobar si el caracter existe en db
 
@@ -49,26 +48,45 @@ export const getInformationOfCharacter = async (characterName: string): Promise<
     return
 }
 
-const mergeAllPages = (pagesOfComics:IpageOfComics[]):IpageOfComics | void =>{
-    const mergedPages = pagesOfComics.reduce((allPages,nextPage):IpageOfComics=>{
+const mergeAllPages = (pagesOfComics: IpageOfComics[]): IpageOfComics => {
+    const mergedPages = pagesOfComics.reduce((allPages, nextPage): IpageOfComics => {
         return {
-            writers:[...allPages.writers,...nextPage.writers],
-            editors:[...allPages.editors,...nextPage.editors],
-            colorists:[...allPages.colorists,...nextPage.colorists],
-            characters:[...allPages.characters,...nextPage.characters],
+            writers: [...allPages.writers, ...nextPage.writers],
+            editors: [...allPages.editors, ...nextPage.editors],
+            colorists: [...allPages.colorists, ...nextPage.colorists],
+            characters: [...allPages.characters, ...nextPage.characters],
         }
     })
     const writers: Set<string> = new Set(mergedPages.writers)
     const editors: Set<string> = new Set(mergedPages.editors)
     const colorists: Set<string> = new Set(mergedPages.colorists)
+    const characters = mergedCharacterNested(mergedPages.characters)
     return {
-        characters:mergedPages.characters,
-        writers:[...writers],
-        editors:[...editors],
-        colorists:[...colorists],
+        characters: characters,
+        writers: [...writers],
+        editors: [...editors],
+        colorists: [...colorists],
     }
 }
 
+const mergedCharacterNested = (characters: ICharacterNested[]): ICharacterNested[] => {
+    const characterIndex: { [key: string]: ICharacterNested } | any = {}
+    characters.forEach((characterNested: ICharacterNested) => {
+        const { character, id, comics } = characterNested
+        if (!characterIndex[`${id}`]) {
+            characterIndex[`${id}`] = {
+                character,
+                comics,
+                id
+            }
+        } else {
+            characterIndex[`${id}`]['comics'] = [...characterIndex[`${id}`]['comics'], ...comics]
+        }
+    })
+    const response: ICharacterNested[] = Object.values(characterIndex)
+    return response
+
+}
 
 const createRequestCollection = async (characterId: number) => {
     const comicsResponse = await axios.get(`${config.MARVEL_API}/characters/${characterId}/comics?limit=1&${auth}`)
@@ -81,8 +99,8 @@ const createRequestCollection = async (characterId: number) => {
     return arrayOfRequests;
 }
 
-const createRequestPromise = (url: string):Promise<IpageOfComics> => {
-    let promise:Promise<IpageOfComics> = new Promise(async (resolve, reject) => {
+const createRequestPromise = (url: string): Promise<IpageOfComics> => {
+    let promise: Promise<IpageOfComics> = new Promise(async (resolve, reject) => {
         try {
             const comicResponse = await axios.get(url)
             const results = comicResponse.data.data.results
@@ -112,7 +130,7 @@ const cleanOnePageOfComics = (results: any): IpageOfComics => {
             const { name, resourceURI } = character
             const idCharacter = resourceURI.split('/').pop()
             charactersToSend.push({
-                name,
+                character: name,
                 id: idCharacter,
                 comics: [title]
             })
