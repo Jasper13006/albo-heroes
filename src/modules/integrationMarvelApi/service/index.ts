@@ -11,7 +11,7 @@ const ts: number = Date.now()
 const hash: string = hasher([String(ts), config.PRIVATE_KEY, config.PUBLIC_KEY])
 const auth: string = `apikey=${config.PUBLIC_KEY}&ts=${ts}&hash=${hash}`
 
-export const getInformationOfCharacter = async (characterName: string): Promise<void> => {
+export const createCharacterInDatabase = async (characterName: string): Promise<void> => {
     try{
         console.time(`Character ${characterName} populated in:`)
         const last_sync = new Date();
