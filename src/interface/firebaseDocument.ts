@@ -1,6 +1,7 @@
 import { ICharacterNested } from "./responsesOfMarvelApi";
 
 export interface ICharacter{
+    alboName:string;
     last_sync:Date;
     name: string;
     id: number;

@@ -28,6 +28,7 @@ export const getInformationOfCharacter = async (characterName: string): Promise<
     const allInfoOfCharacter = mergeAllPages(promisesResolves)
 
     const dataToSend: ICharacter = {
+        alboName:characterName,
         last_sync,
         name,
         id,
