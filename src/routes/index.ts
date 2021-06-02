@@ -1,14 +1,14 @@
 import {Router} from 'express'
 import characterRoutes from './marvel'
-import {getInformationOfCharacter} from '../modules/integrationMarvelApi/service/index'
+import {createCharacterInDatabase} from '../modules/integrationMarvelApi/service/index'
 const router = Router()
 
 router.get('/', async (req, res) => {
     return res.status(200).send({ message: `Welcome to albo comics bookstore` });
 });
 router.get('/populate/',async (req, res)=>{
-    getInformationOfCharacter("ironman")
-    getInformationOfCharacter("capamerica")
+    createCharacterInDatabase("ironman")
+    createCharacterInDatabase("capamerica")
     return res.send({message:"populate iniciated"})
 })
 
