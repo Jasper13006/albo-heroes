@@ -103,7 +103,7 @@ Para hacer update de la base de datos en caso de que sea necesario:
 - La API cuenta con un cron-job que se actualiza todos los días a la 1AM-CiudadDeMéxico
 - Se pueden agregar mas personajes ademas de Iron Man y Capitan America modificando el archivo character.json. Agregando respectivamente el nombre como lo vamos a consultac como key y como aparece en marvel api como value:
 ```json
-    {"drstrange":"Dr. Strange (Marvel:Avengers Alliance)"}
+    {"drstrange":"Dr. Strange (Marvel: Avengers Alliance)"}
 ```
 - Se dejaron en el código console.time para loggear los tiempos de respuesta de las funciones que se encargan de hacer la migración de marvel api a la db local.
 
