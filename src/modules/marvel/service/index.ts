@@ -1,6 +1,4 @@
-import { ICharacterNested } from '../../../interface';
 import { IGetCharactedNested, IGetColaborators } from '../../../interface/responses';
-import { availableCaracters } from '../../../utils/index';
 import * as Repository from '../repository/index';
 
 export const getColaboratorsOfACharacter = async (characterName: string): Promise<IGetColaborators | undefined> => {

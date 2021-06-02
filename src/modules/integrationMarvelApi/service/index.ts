@@ -1,6 +1,6 @@
 import axios from 'axios'
 import config from '../../../config'
-import { hasher,availableCaracters } from '../../../utils/index';
+import { hasher, availableCharacters } from '../../../utils/index';
 import { IpageOfComics, ICharacterNested, ICharacter } from '../../../interface';
 import * as repository from '../repository/index'
 
@@ -12,36 +12,36 @@ const hash: string = hasher([String(ts), config.PRIVATE_KEY, config.PUBLIC_KEY])
 const auth: string = `apikey=${config.PUBLIC_KEY}&ts=${ts}&hash=${hash}`
 
 export const getInformationOfCharacter = async (characterName: string): Promise<void> => {
-    try{
+    try {
         console.time(`Character ${characterName} populated in:`)
         const last_sync = new Date();
 
-    const characterNameForRequest = availableCaracters[characterName]
-    const characterResponse = await axios.get(`${config.MARVEL_API}/characters?name=${characterNameForRequest}&${auth}`);
+        const characterNameForRequest = availableCharacters()[characterName]
+        const characterResponse = await axios.get(`${config.MARVEL_API}/characters?name=${characterNameForRequest}&${auth}`);
 
-    const { name, id } = characterResponse.data.data.results[0];
+        const { name, id } = characterResponse.data.data.results[0];
 
-    const promises = await createRequestCollection(id);
-    const promisesResolves = await Promise.all(promises);
+        const promises = await createRequestCollection(id);
+        const promisesResolves = await Promise.all(promises);
 
-    //* merge all pages
-    const allInfoOfCharacter = mergeAllPages(promisesResolves)
+        //* merge all pages
+        const allInfoOfCharacter = mergeAllPages(promisesResolves)
 
-    const dataToSend: ICharacter = {
-        alboName:characterName,
-        last_sync,
-        name,
-        id,
-        characters: allInfoOfCharacter.characters,
-        colaborators: {
-            writers: allInfoOfCharacter.writers,
-            editors: allInfoOfCharacter.editors,
-            colorists: allInfoOfCharacter.colorists,
+        const dataToSend: ICharacter = {
+            alboName: characterName,
+            last_sync,
+            name,
+            id,
+            characters: allInfoOfCharacter.characters,
+            colaborators: {
+                writers: allInfoOfCharacter.writers,
+                editors: allInfoOfCharacter.editors,
+                colorists: allInfoOfCharacter.colorists,
+            }
         }
-    }
-    await repository.createOrUpdate(dataToSend)
-    console.timeEnd(`Character ${characterName} populated in:`)
-    }catch(err){
+        await repository.createOrUpdate(dataToSend)
+        console.timeEnd(`Character ${characterName} populated in:`)
+    } catch (err) {
         console.error(err)
     }
 }

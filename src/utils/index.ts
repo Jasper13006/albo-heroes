@@ -1,3 +1,3 @@
-export {hasher} from './hasher'
-export {availableCaracters} from './availableCharacters'
-export {validateRequiredParams} from './validateRequiredParams'
+export { hasher } from './hasher'
+export { availableCharacters } from './availableCharacters'
+export { validateRequiredParams } from './validateRequiredParams'
