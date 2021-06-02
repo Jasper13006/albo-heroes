@@ -16,14 +16,12 @@ export const getInformationOfCharacter = async (characterName: string): Promise<
         console.time(`Character ${characterName} populated in:`)
         const last_sync = new Date();
 
-        const characterNameForRequest = availableCharacters()[characterName]
-        const characterResponse = await axios.get(`${config.MARVEL_API}/characters?name=${characterNameForRequest}&${auth}`);
-
+        const characterNameForRequest = encodeURIComponent(availableCharacters()[characterName])
+        const route = `${config.MARVEL_API}/characters?name=${characterNameForRequest}&${auth}`
+        const characterResponse = await axios.get(route);
         const { name, id } = characterResponse.data.data.results[0];
-
         const promises = await createRequestCollection(id);
         const promisesResolves = await Promise.all(promises);
-
         //* merge all pages
         const allInfoOfCharacter = mergeAllPages(promisesResolves)
 
