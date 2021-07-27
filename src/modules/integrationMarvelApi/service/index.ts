@@ -10,7 +10,7 @@ if (!config.PRIVATE_KEY || !config.PUBLIC_KEY) {
 const ts: number = Date.now()
 const hash: string = hasher([String(ts), config.PRIVATE_KEY, config.PUBLIC_KEY])
 const auth: string = `apikey=${config.PUBLIC_KEY}&ts=${ts}&hash=${hash}`
-
+//a grego el nuevo home
 export const createCharacterInDatabase = async (characterName: string): Promise<void> => {
     try{
         console.time(`Character ${characterName} populated in:`)

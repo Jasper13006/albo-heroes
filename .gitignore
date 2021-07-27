@@ -2,5 +2,6 @@ node_modules
 dist
 package-lock*.json
 .vscode
+albo-marvel-firebase-adminsdk-a553h-49f9434731.json
 # dotenv environment variables file
 .env
